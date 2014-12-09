@@ -26,6 +26,7 @@ public class SlackNotifier extends Notifier {
     private String authToken;
     private String buildServerUrl;
     private String room;
+    private String errorRoom;
     private String sendAs;
 
     @Override
@@ -39,6 +40,10 @@ public class SlackNotifier extends Notifier {
 
     public String getRoom() {
         return room;
+    }
+
+    public String getErrorRoom() {
+        return errorRoom;
     }
 
     public String getAuthToken() {
@@ -55,12 +60,13 @@ public class SlackNotifier extends Notifier {
 
 
     @DataBoundConstructor
-    public SlackNotifier(final String teamDomain, final String authToken, final String room, String buildServerUrl, final String sendAs) {
+    public SlackNotifier(final String teamDomain, final String authToken, final String room, final String errorRoom, String buildServerUrl, final String sendAs) {
         super();
         this.teamDomain = teamDomain;
         this.authToken = authToken;
         this.buildServerUrl = buildServerUrl;
         this.room = room;
+        this.errorRoom = errorRoom;
         this.sendAs = sendAs;
     }
 
@@ -82,6 +88,7 @@ public class SlackNotifier extends Notifier {
         private String teamDomain;
         private String token;
         private String room;
+        private String errorRoom;
         private String buildServerUrl;
         private String sendAs;
 
@@ -99,6 +106,10 @@ public class SlackNotifier extends Notifier {
 
         public String getRoom() {
             return room;
+        }
+
+        public String getErrorRoom() {
+            return errorRoom;
         }
 
         public String getBuildServerUrl() {
@@ -119,8 +130,9 @@ public class SlackNotifier extends Notifier {
             if (token == null) token = sr.getParameter("slackToken");
             if (buildServerUrl == null) buildServerUrl = sr.getParameter("slackBuildServerUrl");
             if (room == null) room = sr.getParameter("slackRoom");
+            if (errorRoom == null) errorRoom = sr.getParameter("slackErrorRoom");
             if (sendAs == null) sendAs = sr.getParameter("slackSendAs");
-            return new SlackNotifier(teamDomain, token, room, buildServerUrl, sendAs);
+            return new SlackNotifier(teamDomain, token, room, errorRoom, buildServerUrl, sendAs);
         }
 
         @Override
@@ -128,13 +140,14 @@ public class SlackNotifier extends Notifier {
             teamDomain = sr.getParameter("slackTeamDomain");
             token = sr.getParameter("slackToken");
             room = sr.getParameter("slackRoom");
+            errorRoom = sr.getParameter("slackErrorRoom");
             buildServerUrl = sr.getParameter("slackBuildServerUrl");
             sendAs = sr.getParameter("slackSendAs");
             if (buildServerUrl != null && !buildServerUrl.endsWith("/")) {
                 buildServerUrl = buildServerUrl + "/";
             }
             try {
-                new SlackNotifier(teamDomain, token, room, buildServerUrl, sendAs);
+                new SlackNotifier(teamDomain, token, room, errorRoom, buildServerUrl, sendAs);
             } catch (Exception e) {
                 throw new FormException("Failed to initialize notifier - check your global notifier configuration settings", e, "");
             }
@@ -150,6 +163,7 @@ public class SlackNotifier extends Notifier {
 
     public static class SlackJobProperty extends hudson.model.JobProperty<AbstractProject<?, ?>> {
         private String room;
+        private String errorRoom;
         private boolean startNotification;
         private boolean notifySuccess;
         private boolean notifyAborted;
@@ -161,6 +175,7 @@ public class SlackNotifier extends Notifier {
 
         @DataBoundConstructor
         public SlackJobProperty(String room,
+                                String errorRoom,
                                   boolean startNotification,
                                   boolean notifyAborted,
                                   boolean notifyFailure,
@@ -169,6 +184,7 @@ public class SlackNotifier extends Notifier {
                                   boolean notifyUnstable,
                                   boolean notifyBackToNormal) {
             this.room = room;
+            this.errorRoom = errorRoom;
             this.startNotification = startNotification;
             this.notifyAborted = notifyAborted;
             this.notifyFailure = notifyFailure;
@@ -183,6 +199,10 @@ public class SlackNotifier extends Notifier {
             return room;
         }
 
+        @Exported
+        public String getErrorRoom() {
+            return errorRoom;
+        }
         @Exported
         public boolean getStartNotification() {
             return startNotification;
@@ -246,6 +266,7 @@ public class SlackNotifier extends Notifier {
             @Override
             public SlackJobProperty newInstance(StaplerRequest sr, JSONObject formData) throws hudson.model.Descriptor.FormException {
                 return new SlackJobProperty(sr.getParameter("slackProjectRoom"),
+                        sr.getParameter("slackErrorRoom"),
                         sr.getParameter("slackStartNotification") != null,
                         sr.getParameter("slackNotifyAborted") != null,
                         sr.getParameter("slackNotifyFailure") != null,

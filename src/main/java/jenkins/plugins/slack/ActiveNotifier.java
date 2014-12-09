@@ -62,13 +62,17 @@ public class ActiveNotifier implements FineGrainedNotifier {
         Result result = r.getResult();
         AbstractBuild<?, ?> previousBuild = project.getLastBuild().getPreviousBuild();
         Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
+        String room = jobProperty.getRoom();
+        if (result != Result.SUCCESS) {
+            room = jobProperty.getErrorRoom();
+        }
         if ((result == Result.ABORTED && jobProperty.getNotifyAborted())
                 || (result == Result.FAILURE && jobProperty.getNotifyFailure())
                 || (result == Result.NOT_BUILT && jobProperty.getNotifyNotBuilt())
                 || (result == Result.SUCCESS && previousResult == Result.FAILURE && jobProperty.getNotifyBackToNormal())
                 || (result == Result.SUCCESS && jobProperty.getNotifySuccess())
                 || (result == Result.UNSTABLE && jobProperty.getNotifyUnstable())) {
-            getSlack(r).publish(getBuildStatusMessage(r), getBuildColor(r));
+            getSlack(r).publish(getBuildStatusMessage(r), getBuildColor(r), room);
         }
     }
 

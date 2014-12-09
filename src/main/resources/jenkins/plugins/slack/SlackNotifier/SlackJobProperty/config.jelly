@@ -4,6 +4,9 @@
     	<f:entry title="Project Channel">
       		<f:textbox name="slackProjectRoom" value="${instance.getRoom()}"/>
     	</f:entry>
+    	<f:entry title="Error Channel">
+            <f:textbox name="slackErrorRoom" value="${instance.getErrorRoom()}"/>
+        </f:entry>
 
     	<f:entry title="Notify Build Start">
       		<f:checkbox name="slackStartNotification" value="true" checked="${instance.getStartNotification()}"/>

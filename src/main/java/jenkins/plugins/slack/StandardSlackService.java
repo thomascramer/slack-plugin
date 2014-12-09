@@ -36,7 +36,15 @@ public class StandardSlackService implements SlackService {
     }
 
     public void publish(String message, String color) {
-        for (String roomId : roomIds) {
+        publish(message, color, null);
+    }
+
+    public void publish(String message, String color, String rooms) {
+        String[] notify_rooms = roomIds;
+        if (rooms != null && !rooms.trim().equals("")) {
+            notify_rooms = rooms.split(",");
+        }
+        for (String roomId : notify_rooms) {
             String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
             logger.info("Posting: to " + roomId + " on " + teamDomain + " using " + url +": " + message + " " + color);
             HttpClient client = getHttpClient();
